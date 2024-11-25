@@ -45,8 +45,8 @@ end process Assign_Registers;
 
 
 Asynch_Process : process(RD, STB, RESET) begin
-    X1 <= STB;
-    X2 <= RD;
+    X1 <= not(STB);
+    X2 <= not(RD);
     if(RESET = '0') then
         Y1 <= ((not(Y2) and Y3 and X2) or (Y2 and not(Y3) and X1)) and not(RESET);
         
@@ -54,11 +54,19 @@ Asynch_Process : process(RD, STB, RESET) begin
         
         Y3 <= ((Y3 and X1 and X2) or (not(Y2) and Y3 and X2) or
              (not(Y1) and not(Y2) and not(X1) and X2)) and not(RESET);
-        
+        -- needs to be IBF
         Z1 <= ((Y3 and X1 and X2) or (not(Y1) and not(Y2) and not(X1) and X2) or (not(Y2) and Y3 and X2)
                 or (Y2 and Y3 and X1) or (Y2 and X1 and not(X2)));
-                
+
+        -- needs to be INTR, but this is only enabled when CR = 11
         Z2 <= (Y3 and X1 and X2);
+
+        IBF <= Z1;
+
+        if(Control_Reg0 = '1' and Control_Reg1 = '1')then 
+            INTR <= Z2;
+        end if;
+        
     end if;
 end process Asynch_Process;
 
