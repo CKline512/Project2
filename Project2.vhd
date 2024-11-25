@@ -48,12 +48,12 @@ Asynch_Process : process(RD, STB, RESET) begin
     X1 <= STB;
     X2 <= RD;
     if(RESET = '0') then
-        Y1 <= ((not(Y2) and Y3 and X2) or (Y2 and not(Y3) and X1)) and RESET;
+        Y1 <= ((not(Y2) and Y3 and X2) or (Y2 and not(Y3) and X1)) and not(RESET);
         
-        Y2 <= ((Y3 and X1 and X2) or (Y2 and X1 and not(X2)) or (Y2 and Y3 and X1)) and RESET;
+        Y2 <= ((Y3 and X1 and X2) or (Y2 and X1 and not(X2)) or (Y2 and Y3 and X1)) and not(RESET);
         
         Y3 <= ((Y3 and X1 and X2) or (not(Y2) and Y3 and X2) or
-             (not(Y1) and not(Y2) and not(X1) and X2)) and RESET;
+             (not(Y1) and not(Y2) and not(X1) and X2)) and not(RESET);
         
         Z1 <= ((Y3 and X1 and X2) or (not(Y1) and not(Y2) and not(X1) and X2) or (not(Y2) and Y3 and X2)
                 or (Y2 and Y3 and X1) or (Y2 and X1 and not(X2)));
