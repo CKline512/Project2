@@ -45,9 +45,9 @@ end process Assign_Registers;
 
 
 Asynch_Process : process(RD, STB, RESET) begin
-    X1 <= not(STB);
+    X1 <= STB;
         -- RD has to be a qualified read 
-    X2 <= not(RD);
+    X2 <= RD;
     if(RESET = '0') then
         Y1 <= ((not(Y2) and Y3 and X2) or (Y2 and not(Y3) and X1)) and not(RESET);
         
