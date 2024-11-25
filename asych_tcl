@@ -1,0 +1,85 @@
+#proj2
+
+#inputs:
+# X1, X2, RESET STD_LOGIC
+
+#inouts:
+# Y1, Y2, Y3 STD_LOGIC
+
+#outputs:
+# Z1, Z2 STD_LOGIC
+
+restart
+
+# initialize inputs
+add_force X1 {0 0ns}
+add_force X2 {0 0ns}
+add_force RESET {1 0ns}
+
+# wait out 150ns
+run 150ns
+
+
+#  reset 
+add_force X1 {0 0ns}
+add_force X2 {0 0ns}
+add_force RESET {0 0ns}
+
+run 30ns
+
+
+#  undo reset 
+add_force X1 {0 0ns}
+add_force X2 {0 0ns}
+add_force RESET {1 0ns}
+
+run 30ns
+
+
+#  waveform initial 
+add_force X1 {1 0ns}
+add_force X2 {1 0ns}
+
+run 30ns
+
+#  waveform 1
+add_force X1 {0 0ns}
+add_force X2 {1 0ns}
+
+run 30ns
+
+#  waveform 2
+add_force X1 {1 0ns}
+add_force X2 {1 0ns}
+
+run 30ns
+
+#  waveform 3
+add_force X1 {1 0ns}
+add_force X2 {0 0ns}
+
+run 30ns
+
+#  waveform 4 
+add_force X1 {1 0ns}
+add_force X2 {1 0ns}
+
+run 30ns
+
+#  waveform 2
+add_force X1 {0 0ns}
+add_force X2 {0 0ns}
+
+run 30ns
+
+#  waveform 3
+add_force X1 {0 0ns}
+add_force X2 {1 0ns}
+
+run 30ns
+
+#  waveform 4 
+add_force X1 {1 0ns}
+add_force X2 {1 0ns}
+
+run 30ns
