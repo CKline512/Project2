@@ -1,4 +1,3 @@
-
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
@@ -27,10 +26,9 @@ signal Control_Reg1 : std_logic; -- INTE (Interrupt Enable) Bit
 signal Status_Reg0 : std_logic; -- IBF (Input Buffer Full) Bit
 signal Status_Reg1 : std_logic; -- INTE (Interrupt Enable) Bit
 signal Status_Reg2 : std_logic; -- INTR (Interrupt Request) Bit
+signal X1, X2, Y1, Y2, Y3, Z1, Z2 : std_logic; 
 
 begin
-
-
 
 Assign_Registers : process(CE, A0) begin
     if(not(CE) = '1' and A0 = '0') then --Data in (Read Access)
@@ -46,8 +44,26 @@ Assign_Registers : process(CE, A0) begin
 end process Assign_Registers;
 
 
+Asynch_Process : process(RD, STB, RESET) begin
+    X1 <= STB;
+    X2 <= RD;
+    if(RESET = '0') then
+        Y1 <= ((not(Y2) and Y3 and X2) or (Y2 and not(Y3) and X1)) and RESET;
+        
+        Y2 <= ((Y3 and X1 and X2) or (Y2 and X1 and not(X2)) or (Y2 and Y3 and X1)) and RESET;
+        
+        Y3 <= ((Y3 and X1 and X2) or (not(Y2) and Y3 and X2) or
+             (not(Y1) and not(Y2) and not(X1) and X2)) and RESET;
+        
+        Z1 <= ((Y3 and X1 and X2) or (not(Y1) and not(Y2) and not(X1) and X2) or (not(Y2) and Y3 and X2)
+                or (Y2 and Y3 and X1) or (Y2 and X1 and not(X2)));
+                
+        Z2 <= (Y3 and X1 and X2);
+    end if;
+end process Asynch_Process;
+
 RESET_Process : process(RESET) begin
-    if (RESET = '1') then
+    if (RESET = '0') then
         Control_Reg0 <= '0';
         Control_Reg1 <= '0';
         Status_Reg0 <= '0';
@@ -56,9 +72,10 @@ RESET_Process : process(RESET) begin
     else
         Control_Reg0 <= Control_Reg0;
         Control_Reg1 <= Control_Reg1;
-        Status_Reg0 <= Status_Reg0 ;
-        Status_Reg1 <= Status_Reg1 ;
-        Status_Reg2 <= Status_Reg2 ;
+        Status_Reg0 <= Status_Reg0;
+        Status_Reg1 <= Status_Reg1;
+        Status_Reg2 <= Status_Reg2;
     end if;
 end process RESET_Process; 
 end Behavioral;
+
