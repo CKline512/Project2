@@ -48,7 +48,7 @@ Asynch_Process : process(RD, STB, RESET) begin
     X1 <= STB;
         -- RD has to be a qualified read 
     X2 <= RD;
-    if(RESET = '0') then
+    if(Control_Reg0 = '1') then
         Y1 <= ((not(Y2) and Y3 and X2) or (Y2 and not(Y3) and X1)) and not(RESET);
         
         Y2 <= ((Y3 and X1 and X2) or (Y2 and X1 and not(X2)) or (Y2 and Y3 and X1)) and not(RESET);
@@ -66,9 +66,9 @@ Asynch_Process : process(RD, STB, RESET) begin
 
         if(Control_Reg0 = '1' and Control_Reg1 = '1')then 
             INTR <= Z2;
-        end if;
-        
+        end if;   
     end if;
+        
 end process Asynch_Process;
 
 RESET_Process : process(RESET) begin
