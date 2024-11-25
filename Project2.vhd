@@ -30,15 +30,16 @@ signal X1, X2, Y1, Y2, Y3, Z1, Z2 : std_logic;
 
 begin
 
-Assign_Registers : process(CE, A0) begin
-    if(not(CE) = '1' and A0 = '0') then --Data in (Read Access)
+Assign_Registers : process(CE, A0, RD, WR) begin
+    if(CE = '0' and A0 = '0' and RD = '0' and WR = '1') then --Data in (Read Access) CE and RD asserted, A0 Deasserted
         --allows P to enter D_Bus aswell as P_Reg
+        --QUALIFIED READ
     
     
-    elsif(not(CE) = '1' and A0 = '1') then  -- Control_Reg (for write access only)
-
+    elsif(CE = '0' and A0 = '1' and RD = '1' and WR = '0') then  -- Control_Reg (for write access only) CE, WR, A0 asserted
     
-    elsif(not(CE )= '0' and A0 = '1') then -- Status_Reg for read access only
+    elsif(CE = '0' and A0 = '1' and RD = '1' and WR = '1') then -- Status_Reg for read access only
+        
 
     end if;
 end process Assign_Registers;
