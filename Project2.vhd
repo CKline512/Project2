@@ -20,7 +20,7 @@ architecture Behavioral of Project2 is
 --Status_Reg.1: INTE (Interrupt Enable) Bit
 --Status_Reg.2: INTR (Interrupt Request) Bit
 
-signal P_Reg : std_logic_vector (7 downto 0);
+signal Data_In : std_logic_vector (7 downto 0);
 signal Control_Reg0 : std_logic; -- MODE bit
 signal Control_Reg1 : std_logic; -- INTE (Interrupt Enable) Bit
 signal Status_Reg0 : std_logic; -- IBF (Input Buffer Full) Bit
@@ -28,21 +28,44 @@ signal Status_Reg1 : std_logic; -- INTE (Interrupt Enable) Bit
 signal Status_Reg2 : std_logic; -- INTR (Interrupt Request) Bit
 signal X1, X2, Y1, Y2, Y3, Z1, Z2 : std_logic; 
 
+
 begin
 
+Mode_Logic : process(Status_Reg1) begin
+    if(Control_Reg0 = '0') then -- MODE 0
+        
+    elsif(Control_Reg0 = '1') then -- MODE 1  
+          
+
+
+--D And P set control registers
 Assign_Registers : process(CE, A0, RD, WR) begin
     if(CE = '0' and A0 = '0' and RD = '0' and WR = '1') then --Data in (Read Access) CE and RD asserted, A0 Deasserted
+        D <= "ZZZZZZZZ" when (not controlreg) else				
+             "ZZZZZZZZ" when (not controlreg) else
+              P when (Control_Reg0 = '0') else
+              Data_In when (Control_Reg0 = '1') else
+              "ZZZZZZZZ";
+
         --allows P to enter D_Bus aswell as P_Reg
         --QUALIFIED READ
     
     
     elsif(CE = '0' and A0 = '1' and RD = '1' and WR = '0') then  -- Control_Reg (for write access only) CE, WR, A0 asserted
-    
+         CR1,2 <= "ZZZZZZZZ" when (en_l = '1' and dir = '1') else
+
+						  "ZZZZZZZZ" when (en_l = '1' and dir = '0') else
+
+						  db when (en_l = '0' and dir = '1') else
+				
+						  "ZZZZZZZZ";
     elsif(CE = '0' and A0 = '1' and RD = '1' and WR = '1') then -- Status_Reg for read access only
         
 
     end if;
 end process Assign_Registers;
+
+Control_Outputs : Process
 
 
 Asynch_Process : process(RD, STB, RESET) begin
