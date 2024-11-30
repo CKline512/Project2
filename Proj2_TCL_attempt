@@ -1,0 +1,163 @@
+#Project2_TCL
+
+
+          INTR, IBF: out std_logic;
+          D : inout std_logic_vector (7 downto 0)
+
+#inputs:
+# CE, A0, RD, WR, RESET, STB  STD_LOGIC
+# P std_logic_vector (7 downto 0)
+
+#inout:
+# D std_logic_vector (7 downto 0)
+
+#outputs:
+# INTR, IBF STD_LOGIC
+
+restart
+
+# initialize inputs - check which are active low and active high. 
+add_force CE {1 0ns} # active low
+add_force A0 {0 0ns} 
+add_force RD {1 0ns} # active low
+add_force WR {1 0ns} # active low 
+add_force RESET {0 0ns}
+add_force STB {0 0ns}
+add_force P {00000000 0ns}
+
+
+# wait out 150ns
+run 150ns
+
+#task 1 
+#check D0-D7
+add_force CE {1 0ns}
+add_force A0 {0 0ns}
+add_force RD {0 0ns}
+
+run 20ns
+
+
+#check D0-D7
+add_force CE {0 0ns}
+add_force A0 {1 0ns}
+add_force RD {1 0ns}
+
+run 20ns
+
+#
+#
+# MODE 0 INPUT 
+#
+#
+
+# loads CR0 and CR1
+add_force CE {0 0ns}
+add_force A0 {1 0ns}
+add_force RD {1 0ns}
+add_force WR {0 0ns}
+
+run 20ns
+
+#rising edge for WR
+add_force CE {0 0ns}
+add_force A0 {1 0ns}
+add_force RD {1 0ns}
+add_force WR {1 0ns}
+
+run 20ns
+
+# read Peripheral Data & Transparency Test 
+add_force CE {0 0ns}
+add_force A0 {0 0ns}
+add_force RD {0 0ns}
+add_force P {01011010 0ns}
+
+run 20ns
+
+# check D0-D7 change Px its to changes in Dx bits 
+add_force P {10100101 0ns}
+run 20ns
+
+
+# check transparency again with Rd= 1
+add_force RD {0 0ns}
+run 20ns
+
+#
+#STB = 1 
+# 
+add_force STB {1 0ns}
+run 20ns
+
+#
+#
+# Mode 1 
+#
+#
+
+# load 
+add_force CE {0 0ns}
+add_force A0 {1 0ns}
+add_force WR {0 0ns}
+
+run 20ns
+
+# load 
+add_force CE {0 0ns}
+add_force A0 {1 0ns}
+add_force WR {1 0ns}
+
+run 20ns
+
+# read status 
+add_force CE {0 0ns}
+add_force A0 {1 0ns}
+add_force RD {0 0ns}
+# D0-D2 should be 010 while Rd = 0
+run 20ns
+
+add_force CE {0 0ns}
+add_force A0 {1 0ns}
+add_force RD {1 0ns}
+run 20ns
+
+#Peripheral Load Data 
+add_force CE {1 0ns}
+add_force P {11000011 0ns}
+
+add_force STB {0 0ns}
+run 20ns
+
+add_force STB {1 0ns}
+run 20ns
+
+
+# read Status 
+
+add_force CE {0 0ns}
+add_force A0 {1 0ns}
+add_force RD {0 0ns}
+# IBF AND INTR should not change 
+# D0-D2: 111
+run 20ns
+
+add_force CE {0 0ns}
+add_force A0 {1 0ns}
+add_force RD {1 0ns}
+run 20ns
+
+# read Data 
+add_force CE {0 0ns}
+add_force A0 {0 0ns}
+add_force RD {0 0ns}
+# IBF AND INTR should change on falling edge 
+run 20ns
+
+add_force CE {0 0ns}
+add_force A0 {0 0ns}
+add_force RD {1 0ns}
+# D = 11000011 :: D3
+run 20ns
+
+# finish last part after {
