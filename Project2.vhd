@@ -20,7 +20,7 @@ architecture Behavioral of Project2 is
 --Status_Reg.1: INTE (Interrupt Enable) Bit
 --Status_Reg.2: INTR (Interrupt Request) Bit
 
-signal Data_In : std_logic_vector (7 downto 0);
+--signal Data_In : std_logic_vector (7 downto 0);
 signal Control_Reg0 : std_logic; -- MODE bit
 signal Control_Reg1 : std_logic; -- INTE (Interrupt Enable) Bit
 signal Status_Reg0 : std_logic; -- IBF (Input Buffer Full) Bit
@@ -103,25 +103,10 @@ Asynch_Process : process(RD, STB, RESET) begin
         
 end process Asynch_Process;
 
-RESET_Process : process(RESET) begin
-    if (RESET = '0') then
-        Control_Reg0 <= '0';
-        Control_Reg1 <= '0';
-        Status_Reg0 <= '0';
-        Status_Reg1 <= '0';
-        Status_Reg2 <= '0';
-    else
-        Control_Reg0 <= Control_Reg0;
-        Control_Reg1 <= Control_Reg1;
-        Status_Reg0 <= Status_Reg0;
-        Status_Reg1 <= Status_Reg1;
-        Status_Reg2 <= Status_Reg2;
-    end if;
-end process RESET_Process; 
 
-Status_Reg0 <= IBF_signal;     -- IBF status
-Status_Reg1 <= Control_Reg1;  -- INTE status
-Status_Reg2 <= INTR_signal;   -- INTR status 
+Status_Reg0 <= IBF_signal when CE = '0' else '0' when RESET = '1';     -- IBF status
+Status_Reg1 <= Control_Reg1 when CE = '0' else '0' when RESET = '1';  -- INTE status
+Status_Reg2 <= INTR_signal when CE = '0' else '0' when RESET = '1';   -- INTR status 
 
 IBF <= IBF_signal;
 INTR <= INTR_signal;
