@@ -50,7 +50,7 @@ control_reg: process(WR, CE, A0, RESET)
 end process control_reg;
 
 
-data : process(CE, WR, A0, RD, Control_Reg0) begin 
+data : process(CE, WR, A0, RD, Control_Reg0, P, Status_Reg2, Status_Reg1, Status_Reg0, mode1_data) begin 
     if(CE = '0' and RD = '0' and WR = '1') then 
         if(A0 = '1') then 
             if(Control_Reg0 = '1') then 
@@ -63,7 +63,6 @@ data : process(CE, WR, A0, RD, Control_Reg0) begin
             data_reg(1) <= Status_Reg1;
             data_reg(0) <= Status_Reg0;
         end if;
-     
     end if;
 
 end process data;
@@ -75,38 +74,31 @@ mode1_register_control: process(CE, STB, A0, P)begin
 
 end process mode1_register_control;
 
+X1 <= STB;
+-- RD has to be a qualified read
+X2 <= RD;
 
-Asynch_Process : process(RD, STB, RESET) begin
-    X1 <= STB;
-        -- RD has to be a qualified read 
-    X2 <= RD;
-    if(Control_Reg0 = '1') then
-        Y1 <= ((not(Y2) and Y3 and X2) or (Y2 and not(Y3) and X1)) and not(RESET);
-        
-        Y2 <= ((Y3 and X1 and X2) or (Y2 and X1 and not(X2)) or (Y2 and Y3 and X1)) and not(RESET);
-        
-        Y3 <= ((Y3 and X1 and X2) or (not(Y2) and Y3 and X2) or
+Y1 <= ((not(Y2) and Y3 and X2) or (Y2 and not(Y3) and X1)) and not(RESET);
+
+Y2 <= ((Y3 and X1 and X2) or (Y2 and X1 and not(X2)) or (Y2 and Y3 and X1)) and not(RESET);
+
+Y3 <= ((Y3 and X1 and X2) or (not(Y2) and Y3 and X2) or
              (not(Y1) and not(Y2) and not(X1) and X2)) and not(RESET);
-        -- needs to be IBF
-        Z1 <= ((Y3 and X1 and X2) or (not(Y1) and not(Y2) and not(X1) and X2) or (not(Y2) and Y3 and X2)
+             
+Z1 <= ((Y3 and X1 and X2) or (not(Y1) and not(Y2) and not(X1) and X2) or (not(Y2) and Y3 and X2)
                 or (Y2 and Y3 and X1) or (Y2 and X1 and not(X2)));
 
-        -- needs to be INTR, but this is only enabled when CR = 11
-        Z2 <= (Y3 and X1 and X2);
-
-        IBF_signal <= Z1;
-
-        if(Control_Reg0 = '1' and Control_Reg1 = '1')then 
-            INTR_signal <= Z2;
-        end if;   
-    end if;
-        
-end process Asynch_Process;
+Z2 <= (Y3 and X1 and X2);
 
 
-Status_Reg0 <= IBF_signal when CE = '0' else '0' when RESET = '1';     -- IBF status
-Status_Reg1 <= Control_Reg1 when CE = '0' else '0' when RESET = '1';  -- INTE status
-Status_Reg2 <= INTR_signal when CE = '0' else '0' when RESET = '1';   -- INTR status 
+
+INTR_signal <= Z2 when Control_Reg0 = '1' and Control_Reg1 = '1' else '0';
+
+IBF_signal <= Z1 when Control_Reg0 = '1' else '0';
+
+Status_Reg0 <= IBF_signal when CE = '0' else '0' ;     -- IBF status
+Status_Reg1 <= Control_Reg1 when CE = '0' else '0';  -- INTE status
+Status_Reg2 <= INTR_signal when CE = '0' else '0';   -- INTR status 
 
 IBF <= IBF_signal;
 INTR <= INTR_signal;
