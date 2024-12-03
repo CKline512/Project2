@@ -30,6 +30,7 @@ signal X1, X2, Y1, Y2, Y3, Z1, Z2 : std_logic;
 signal mode1_data : std_logic_vector (7 downto 0);
 signal data_reg : std_logic_vector (7 downto 0);
 signal IBF_signal, INTR_signal : std_logic;
+signal status_reg_signal : std_logic_vector (2 downto 0);
 
 
 begin
@@ -37,11 +38,11 @@ begin
 
 control_reg_process: process(WR, CE, A0, RESET) 
     begin 
-    if (RESET = '1') then 
+    if (RESET'event AND RESET = '1') then 
         Control_Reg <= "00";
     end if;
     if rising_edge(WR) and CE = '0' and A0 = '1' then 
-        Control_Reg <= D(1 downto 0);
+        Control_Reg <= D(7 downto 6);
     end if; 
 end process control_reg_process;
 
@@ -56,9 +57,7 @@ data : process(CE, WR, A0, RD, Control_Reg, P, Status_Reg2, Status_Reg1, Status_
     if(CE = '0' and RD = '0' and WR = '1' and A0 = '1' and Control_Reg(0) = '1') then 
         data_reg <= P;
     elsif(CE = '0' and RD = '0' and WR = '1' and A0 = '0') then
-            data_reg(2) <= Status_Reg2;
-            data_reg(1) <= Status_Reg1;
-            data_reg(0) <= Status_Reg0;
+            data_reg(2 downto 0) <= status_reg_signal(2 downto 0);
      end if;
     
 
@@ -97,6 +96,9 @@ Status_Reg0 <= IBF_signal when CE = '0' else '0' ;     -- IBF status
 Status_Reg1 <= Control_Reg(1) when CE = '0' else '0';  -- INTE status
 Status_Reg2 <= INTR_signal when CE = '0' else '0';   -- INTR status 
 
+status_reg_signal(0) <= Status_Reg0;
+status_reg_signal(1) <= Status_Reg1;
+status_reg_signal(2) <= Status_Reg2;
 
 IBF <= IBF_signal;
 INTR <= INTR_signal;
