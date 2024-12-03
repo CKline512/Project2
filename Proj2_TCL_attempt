@@ -1,8 +1,8 @@
 #Project2_TCL
 
 
-          INTR, IBF: out std_logic;
-          D : inout std_logic_vector (7 downto 0)
+         # INTR, IBF: out std_logic;
+         # D : inout std_logic_vector (7 downto 0)
 
 #inputs:
 # CE, A0, RD, WR, RESET, STB  STD_LOGIC
@@ -16,11 +16,13 @@
 
 restart
 
-# initialize inputs - check which are active low and active high. 
-add_force CE {1 0ns} # active low
+
+# initialize inputs - check which are active low and active high.
+add_force D {00000000 0ns}
+add_force CE {1 0ns} 
 add_force A0 {0 0ns} 
-add_force RD {1 0ns} # active low
-add_force WR {1 0ns} # active low 
+add_force RD {1 0ns}
+add_force WR {1 0ns}
 add_force RESET {0 0ns}
 add_force STB {0 0ns}
 add_force P {00000000 0ns}
@@ -39,6 +41,7 @@ run 20ns
 
 
 #check D0-D7
+remove_forces D 
 add_force CE {0 0ns}
 add_force A0 {1 0ns}
 add_force RD {1 0ns}
@@ -51,7 +54,10 @@ run 20ns
 #
 #
 
+
 # loads CR0 and CR1
+#Load /CR.0 = 0; CR.1 = 0
+#add_force D {00000000 0ns}
 add_force CE {0 0ns}
 add_force A0 {1 0ns}
 add_force RD {1 0ns}
@@ -96,7 +102,9 @@ run 20ns
 #
 #
 
-# load 
+# load
+#Load /CR.0 = 0; CR.1 = 1
+add_force D {00000010 0ns} 
 add_force CE {0 0ns}
 add_force A0 {1 0ns}
 add_force WR {0 0ns}
@@ -120,6 +128,9 @@ run 20ns
 add_force CE {0 0ns}
 add_force A0 {1 0ns}
 add_force RD {1 0ns}
+run 20ns
+
+remove_forces D
 run 20ns
 
 #Peripheral Load Data 
@@ -157,7 +168,6 @@ run 20ns
 add_force CE {0 0ns}
 add_force A0 {0 0ns}
 add_force RD {1 0ns}
-# D = 11000011 :: D3
+# should be D = 11000011 :: D3
 run 20ns
 
-# finish last part after {
