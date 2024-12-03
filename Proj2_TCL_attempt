@@ -18,7 +18,6 @@ restart
 
 
 # initialize inputs - check which are active low and active high.
-add_force D {00000000 0ns}
 add_force CE {1 0ns} 
 add_force A0 {0 0ns} 
 add_force RD {1 0ns}
@@ -41,7 +40,6 @@ run 20ns
 
 
 #check D0-D7
-remove_forces D 
 add_force CE {0 0ns}
 add_force A0 {1 0ns}
 add_force RD {1 0ns}
