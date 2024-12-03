@@ -55,7 +55,7 @@ run 20ns
 
 # loads CR0 and CR1
 #Load /CR.0 = 0; CR.1 = 0
-#add_force D {00000000 0ns}
+add_force D {00000000 0ns}
 add_force CE {0 0ns}
 add_force A0 {1 0ns}
 add_force RD {1 0ns}
@@ -72,6 +72,7 @@ add_force WR {1 0ns}
 run 20ns
 
 # read Peripheral Data & Transparency Test 
+remove_forces D
 add_force CE {0 0ns}
 add_force A0 {0 0ns}
 add_force RD {0 0ns}
