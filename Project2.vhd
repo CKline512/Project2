@@ -41,10 +41,10 @@ control_reg: process(WR, CE, A0, RESET)
         Control_Reg0 <= '0';
         Control_Reg1 <= '0';
     end if;
-    if falling_edge(WR) then 
+    if rising_edge(WR) then 
         if(CE = '0' and A0 = '1')then 
-            Control_Reg0 <= D(7);
-            Control_Reg1 <= D(6);
+            Control_Reg0 <= D(0);
+            Control_Reg1 <= D(1);
         end if;
     end if; 
 end process control_reg;
@@ -64,6 +64,7 @@ data : process(CE, WR, A0, RD, Control_Reg0, P, Status_Reg2, Status_Reg1, Status
             data_reg(0) <= Status_Reg0;
         end if;
     end if;
+    
 
 end process data;
 
