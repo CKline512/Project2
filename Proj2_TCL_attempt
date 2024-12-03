@@ -102,7 +102,7 @@ run 20ns
 
 # load
 #Load /CR.0 = 0; CR.1 = 1
-add_force D {00000010 0ns} 
+add_force D {00000011 0ns} 
 add_force CE {0 0ns}
 add_force A0 {1 0ns}
 add_force WR {0 0ns}
