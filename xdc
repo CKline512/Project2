@@ -4,10 +4,15 @@
 ## - uncomment the lines corresponding to used pins
 ## - rename the used ports (in each line, after get_ports) according to the top level signal names in the project
 
+set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets STB];
+set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets WR];
+
+
 # ALLOW COMBINATORIAL LOOPS :
 set_property ALLOW_COMBINATORIAL_LOOPS TRUE [get_nets Y1*];
 set_property ALLOW_COMBINATORIAL_LOOPS TRUE [get_nets Y2*];
 set_property ALLOW_COMBINATORIAL_LOOPS TRUE [get_nets Y3*];
+set_property ALLOW_COMBINATORIAL_LOOPS TRUE [get_nets D*];
 
 ##Pmod Headers
 ##Pmod Header JA
@@ -66,4 +71,13 @@ set_property -dict { PACKAGE_PIN J3 IOSTANDARD LVCMOS33 } [get_ports { STB }]; #
 set_property -dict { PACKAGE_PIN J4 IOSTANDARD LVCMOS33 } [get_ports { INTR }]; #IO_L21P_T3_DQS_35 Sch=jc[9]
 
 set_property -dict { PACKAGE_PIN E6 IOSTANDARD LVCMOS33 } [get_ports { IBF }]; #IO_L5P_T0_AD13P_35 Sch=jc[10]
+
+
+##Pmod Header JD
+
+set_property -dict { PACKAGE_PIN H4 IOSTANDARD LVCMOS33 } [get_ports { Y1 }]; #IO_L21N_T3_DQS_35 Sch=jd[1]
+
+set_property -dict { PACKAGE_PIN H1 IOSTANDARD LVCMOS33 } [get_ports { Y2 }]; #IO_L17P_T2_35 Sch=jd[2]
+
+set_property -dict { PACKAGE_PIN G1 IOSTANDARD LVCMOS33 } [get_ports { Y3 }]; #IO_L17N_T2_35 Sch=jd[3]
 
