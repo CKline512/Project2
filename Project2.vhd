@@ -40,9 +40,9 @@ begin
 
 control_reg_process: process(WR, CE, A0, RESET) 
     begin 
---    if (RESET'event AND RESET = '1') then 
---        control_reg_signal <= "00";
---    end if;
+    if (rising_edge(RESET)) then 
+        control_reg_signal <= "00";
+    end if;
     if rising_edge(WR) then 
         if(CE = '0' and A0 = '1') then 
             control_reg_signal <= D(7 downto 6);
@@ -55,12 +55,12 @@ Control_Reg <= control_reg_signal when RESET = '0' else "00";
 
 data : process(CE, WR, A0, RD, Control_Reg, P, status_reg_signal, mode1_data) begin 
     if(falling_edge(WR))then 
-        if(CE = '0' and RD = '0' and A0 = '1' and Control_Reg(0) = '0')then 
+        if(CE = '0' and RD = '0' and A0 = '1' and Control_Reg(0) = '1')then 
             data_reg <= mode1_data;
         end if;
     end if;
     
-    if(CE = '0' and RD = '0' and WR = '1' and A0 = '1' and Control_Reg(0) = '1') then 
+    if(CE = '0' and RD = '0' and WR = '1' and A0 = '1' and Control_Reg(0) = '0') then 
         data_reg <= P;
     elsif(CE = '0' and RD = '0' and WR = '1' and A0 = '0') then
             data_reg(2 downto 0) <= status_reg_signal(2 downto 0);
