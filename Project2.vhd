@@ -5,7 +5,8 @@ entity Project2 is
     Port(CE, A0, RD, WR, RESET, STB : in std_logic;
           P : in std_logic_vector (7 downto 0);
           INTR, IBF: out std_logic;
-          D : inout std_logic_vector (7 downto 0));
+          D: inout std_logic_vector (7 downto 0);
+          Y1, Y2, Y3 : inout std_logic);
 end Project2;
 
 architecture Behavioral of Project2 is
@@ -26,11 +27,12 @@ signal Control_Reg : std_logic_vector(1 downto 0); --(0) = mode, (1) = INTE
 signal Status_Reg0 : std_logic; -- IBF (Input Buffer Full) Bit
 signal Status_Reg1 : std_logic; -- INTE (Interrupt Enable) Bit
 signal Status_Reg2 : std_logic; -- INTR (Interrupt Request) Bit
-signal X1, X2, Y1, Y2, Y3, Z1, Z2 : std_logic; 
+signal X1, X2, Z1, Z2 : std_logic; 
 signal mode1_data : std_logic_vector (7 downto 0);
 signal data_reg : std_logic_vector (7 downto 0);
 signal IBF_signal, INTR_signal : std_logic;
 signal status_reg_signal : std_logic_vector (2 downto 0);
+signal control_reg_signal : std_logic_vector(1 downto 0 );
 
 
 begin
@@ -38,16 +40,20 @@ begin
 
 control_reg_process: process(WR, CE, A0, RESET) 
     begin 
-    if (RESET'event AND RESET = '1') then 
-        Control_Reg <= "00";
-    end if;
-    if rising_edge(WR) and CE = '0' and A0 = '1' then 
-        Control_Reg <= D(7 downto 6);
+--    if (RESET'event AND RESET = '1') then 
+--        control_reg_signal <= "00";
+--    end if;
+    if rising_edge(WR) then 
+        if(CE = '0' and A0 = '1') then 
+            control_reg_signal <= D(7 downto 6);
+        end if;
     end if; 
+    
 end process control_reg_process;
 
+Control_Reg <= control_reg_signal when RESET = '0' else "00";
 
-data : process(CE, WR, A0, RD, Control_Reg, P, Status_Reg2, Status_Reg1, Status_Reg0, mode1_data) begin 
+data : process(CE, WR, A0, RD, Control_Reg, P, status_reg_signal, mode1_data) begin 
     if(falling_edge(WR))then 
         if(CE = '0' and RD = '0' and A0 = '1' and Control_Reg(0) = '0')then 
             data_reg <= mode1_data;
