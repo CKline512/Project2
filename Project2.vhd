@@ -55,7 +55,7 @@ Control_Reg <= control_reg_signal when RESET = '0' else "00";
 
 data : process(CE, WR, A0, RD, Control_Reg, P, status_reg_signal, mode1_data) begin 
     if(falling_edge(WR))then 
-        if(CE = '1' and RD = '0' and A0 = '1' and Control_Reg(0) = '1')then 
+        if(CE = '0' and RD = '0' and A0 = '1' and Control_Reg(0) = '1')then 
             data_reg <= mode1_data;
         end if;
     end if;
@@ -70,7 +70,7 @@ data : process(CE, WR, A0, RD, Control_Reg, P, status_reg_signal, mode1_data) be
 end process data;
 
 mode1_register_control: process(CE, STB, A0, P)begin
-    if(CE = '0' and falling_edge(STB) and A0 = '1') then 
+    if(CE = '1' and falling_edge(STB) and A0 = '1') then 
         mode1_data <= P;
     end if; 
 
