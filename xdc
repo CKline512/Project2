@@ -58,7 +58,7 @@ set_property -dict { PACKAGE_PIN H16 IOSTANDARD LVCMOS33 } [get_ports { Y3 }]; #
 
 set_property -dict { PACKAGE_PIN K1 IOSTANDARD LVCMOS33 } [get_ports { CE }]; #IO_L23N_T3_35 Sch=jc[1] #BF SW1
 
-set_property -dict { PACKAGE_PIN F6 IOSTANDARD LVCMOS33 } [get_ports { RD}]; #IO_L19N_T3_VREF_35 Sch=jc[2] #BF SW2
+set_property -dict { PACKAGE_PIN F6 IOSTANDARD LVCMOS33 } [get_ports { RD }]; #IO_L19N_T3_VREF_35 Sch=jc[2] #BF SW2
 
 set_property -dict { PACKAGE_PIN J2 IOSTANDARD LVCMOS33 } [get_ports { WR }]; #IO_L22N_T3_35 Sch=jc[3] #BF SW3
 
