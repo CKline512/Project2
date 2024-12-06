@@ -1,3 +1,24 @@
+----------------------------------------------------------------------------------
+-- Company: 
+-- Engineer: 
+-- 
+-- Create Date: 12/06/2024 01:54:21 PM
+-- Design Name: 
+-- Module Name: project_o - Behavioral
+-- Project Name: 
+-- Target Devices: 
+-- Tool Versions: 
+-- Description: 
+-- 
+-- Dependencies: 
+-- 
+-- Revision:
+-- Revision 0.01 - File Created
+-- Additional Comments:
+-- 
+----------------------------------------------------------------------------------
+
+
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
@@ -10,18 +31,22 @@ use IEEE.STD_LOGIC_1164.ALL;
 --library UNISIM;
 --use UNISIM.VComponents.all;
 
-entity proj2 is
-  Port ( CE,  WR, RD, STB : in std_logic; -- active low
+entity project_o is
+Port ( CE,  WR, RD, STB : in std_logic; -- active low
          A0, RESET : in std_logic; -- active high
         P : in std_logic_vector(7 downto 0);
         D : inout std_logic_vector(7 downto 0);
         Y1, Y2 : inout std_logic; -- used for the asynchro section
         INTR, IBF : out std_logic;
+        data_in_check : out std_logic_vector(7 downto 0);
+        CR_check : out std_logic_vector(1 downto 0);
+        SR_check : out std_logic_vector(2 downto 0);
         OE : out std_logic
         );
-end proj2;
+end project_o;
 
-architecture Behavioral of proj2 is
+architecture Behavioral of project_o is
+
 
 signal WR_rising : std_logic;
 signal data_in, D_value : std_logic_vector(7 downto 0);
@@ -29,21 +54,24 @@ signal CR : std_logic_vector(1 downto 0);
 signal SR : std_logic_vector(2 downto 0);  -- 2 = INTR, 1 = INTE, 0 = IBF
 signal X1, X2 : std_logic;
 signal P_signal : std_logic_vector(7 downto 0);
-signal IBF_sig, INTR_sig : std_logic;
+signal IBF_signal, INTR_signal : std_logic;
 signal check_value : std_logic;
 signal Qualified_read : std_logic;
 signal D_value_rep : std_logic_vector(7 downto 0);
+signal stb_signal : std_logic;
+signal check : std_logic := '0';
 
 begin
 
 -- input to signal assignment
---P_signal <= P when RESET = '0' else (others => '0');
+P_signal <= P;
 WR_rising <= WR;
+stb_signal <= STB;
 
 -- Mode 0 output
 output_op : process(P, CE, A0, CR, RD, STB, SR, data_in, RESET) begin
     -- Mode 1  
-    if(falling_edge(STB)) then
+    if(falling_edge(stb_signal)) then
         if(CE = '0' and A0 = '0' and RD = '0' and CR(0) = '1')then
             D_value <= data_in;
         end if;
@@ -92,11 +120,9 @@ CR_op : process(D, WR_rising, RESET, CE, A0) begin
 end process CR_op;
 
 
-data_in_op : process(P, CE, A0, STB, RESET) begin
-    if(falling_edge(STB)) then
-        if(CE = '0' and A0 = '0') then
+data_in_op : process(P, CE, A0, stb_signal, RESET) begin
+    if(falling_edge(stb_signal) and CE = '0' and A0 ='0') then
             data_in <= P;
-        end if;
     end if;
        
         if(RESET = '0') then
@@ -114,29 +140,28 @@ D <= D_value when CE = '0' else (others => 'Z');
 
 
 -- asynchronous components
-X1 <= STB;
-
-X2 <= RD;
 
 
-Y1 <= ((Y1 and Y2) or (X1 and X2 and Y2) or (not(X1) and Y1) or (not(Y2) and Y1)) when CE = '0' and A0 = '0' and CR = "11" else '0' when RESET = '1';
+Y1 <= ((Y1 and Y2) or (STB and RD and Y2) or (not(STB) and Y1) or (not(RD) and Y1)) when CE = '0' and A0 = '0' and CR = "11" else '0' when RESET = '1';
 
-Y2 <= ((not(Y1) and Y2) or (not(X1) and X2 and Y1) or (not(X1) and Y2) or (X2 and Y2)) when CE = '0' and A0 = '0' and CR = "11" else '0' when RESET = '1';
+Y2 <= ((not(Y1) and Y2) or (not(STB) and RD and not(Y2)) or (not(STB) and Y2) or (RD and Y2)) when CE = '0' and A0 = '0' and CR = "11" else '0' when RESET = '1';
 
              
-IBF_sig <= ((Y2) or (not(X1) and Y1) or (not(X1) and Y1) or (not(X1) and X2)) when CE = '0' and A0 = '0' and CR = "11" else '0'  when RESET = '1';
+IBF_signal <= ((Y2) or (not(STB) and Y1 and not(Y2)) or (not(RD) and Y1) or (not(STB) and RD)) when CE = '0' and A0 = '0' and CR = "11" else '0'  when RESET = '1';
 
-INTR_sig <= Y1 and Y2 when CE = '0' and A0 = '0' and CR = "11" else '0' when RESET = '1';
-
-
-SR(2) <= INTR_sig when CE = '0' else '0';
-SR(1) <= CR(1) when CE = '0' else '0';
-SR(0) <= IBF_sig when CE = '0' else '0';
-
-IBF <=  IBF_sig;
-INTR <= INTR_sig;
+INTR_signal <= ((not(STB) and not(RD) and Y2) or (RD and Y1 and Y2) or (not(STB) and Y1 and Y2)) when CE = '0' and A0 = '0' and CR = "11" else '0' when RESET = '1';
 
 
+SR(2) <= INTR_signal;
+SR(1) <= CR(1);
+SR(0) <= IBF_signal;
 
+
+CR_check <= CR; -- debug signal
+SR_check <= SR; -- debug signal
+
+IBF <=  IBF_signal;
+INTR <= INTR_signal;
 
 end Behavioral;
+
