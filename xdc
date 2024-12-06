@@ -37,7 +37,7 @@ set_property -dict { PACKAGE_PIN G18 IOSTANDARD LVCMOS33 } [get_ports { P[7] }];
 
 ###Pmod Header JB
 
-#set_property -dict { PACKAGE_PIN D14 IOSTANDARD LVCMOS33 } [get_ports {  }]; #IO_L1P_T0_AD0P_15 Sch=jb[1]
+set_property -dict { PACKAGE_PIN D14 IOSTANDARD LVCMOS33 } [get_ports { OE }]; #IO_L1P_T0_AD0P_15 Sch=jb[1]
 
 #set_property -dict { PACKAGE_PIN F16 IOSTANDARD LVCMOS33 } [get_ports {  }]; #IO_L14N_T2_SRCC_15 Sch=jb[2]
 
@@ -58,7 +58,7 @@ set_property -dict { PACKAGE_PIN H16 IOSTANDARD LVCMOS33 } [get_ports { Y3 }]; #
 
 set_property -dict { PACKAGE_PIN K1 IOSTANDARD LVCMOS33 } [get_ports { CE }]; #IO_L23N_T3_35 Sch=jc[1] #BF SW1
 
-set_property -dict { PACKAGE_PIN F6 IOSTANDARD LVCMOS33 } [get_ports { RD }]; #IO_L19N_T3_VREF_35 Sch=jc[2] #BF SW2
+set_property -dict { PACKAGE_PIN F6 IOSTANDARD LVCMOS33 } [get_ports { RD}]; #IO_L19N_T3_VREF_35 Sch=jc[2] #BF SW2
 
 set_property -dict { PACKAGE_PIN J2 IOSTANDARD LVCMOS33 } [get_ports { WR }]; #IO_L22N_T3_35 Sch=jc[3] #BF SW3
 
