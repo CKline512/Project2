@@ -1,113 +1,149 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
-entity Project2 is 
-    Port(CE, A0, RD, WR, RESET, STB : in std_logic;
-          P : in std_logic_vector (7 downto 0);
-          INTR, IBF: out std_logic;
-          D: inout std_logic_vector (7 downto 0);
-          Y1, Y2, Y3 : inout std_logic);
-end Project2;
+-- Uncomment the following library declaration if using
+-- arithmetic functions with Signed or Unsigned values
+--use IEEE.NUMERIC_STD.ALL;
 
-architecture Behavioral of Project2 is
+-- Uncomment the following library declaration if instantiating
+-- any Xilinx leaf cells in this code.
+--library UNISIM;
+--use UNISIM.VComponents.all;
 
---Control_Reg.0: MODE Bit
---    if 0: Mode 0 input from peripheral
---    if 1: Mode 1 input from peripheral
---Control_Reg1: INTE (Interrupt Enable) Bit
---    if 1: signal INTR is enabled
---    if 0: INTR is disabled
---Status_Reg.0: IBF (Input Buffer Full) Bit
---Status_Reg.1: INTE (Interrupt Enable) Bit
---Status_Reg.2: INTR (Interrupt Request) Bit
+entity proj2 is
+  Port ( CE,  WR, RD, STB : in std_logic; -- active low
+         A0, RESET : in std_logic; -- active high
+        P : in std_logic_vector(7 downto 0);
+        D : inout std_logic_vector(7 downto 0);
+        Y1, Y2 : inout std_logic; -- used for the asynchro section
+        INTR, IBF, Z1check, Z2check, X1_check, X2_check : out std_logic;
+        CR_out : out std_logic_vector(1 downto 0);
+        SR_out : out std_logic_vector(2 downto 0);
+        data_in_out : out std_logic_vector(7 downto 0);
+        OE : out std_logic
+        );
+end proj2;
 
---signal Data_In : std_logic_vector (7 downto 0);
-signal Control_Reg : std_logic_vector(1 downto 0); --(0) = mode, (1) = INTE
---signal Control_Reg1 : std_logic; -- INTE (Interrupt Enable) Bit
-signal Status_Reg0 : std_logic; -- IBF (Input Buffer Full) Bit
-signal Status_Reg1 : std_logic; -- INTE (Interrupt Enable) Bit
-signal Status_Reg2 : std_logic; -- INTR (Interrupt Request) Bit
-signal X1, X2, Z1, Z2 : std_logic; 
-signal mode1_data : std_logic_vector (7 downto 0);
-signal data_reg : std_logic_vector (7 downto 0);
-signal IBF_signal, INTR_signal : std_logic;
-signal status_reg_signal : std_logic_vector (2 downto 0);
-signal control_reg_signal : std_logic_vector(1 downto 0 );
+architecture Behavioral of proj2 is
 
+signal WR_rising : std_logic;
+signal data_in, D_value : std_logic_vector(7 downto 0);
+signal CR : std_logic_vector(1 downto 0);
+signal SR : std_logic_vector(2 downto 0);  -- 2 = INTR, 1 = INTE, 0 = IBF
+signal X1, X2, Z1, Z2 : std_logic;
+signal P_signal : std_logic_vector(7 downto 0);
+signal IBF_sig, INTR_sig : std_logic;
+signal check_value : std_logic;
+signal Qualified_read : std_logic;
+signal D_value_rep : std_logic_vector(7 downto 0);
 
 begin
 
+-- input to signal assignment
+--P_signal <= P when RESET = '0' else (others => '0');
+WR_rising <= WR;
 
-control_reg_process: process(WR, CE, A0, RESET) 
-    begin 
-    if (rising_edge(RESET)) then 
-        control_reg_signal <= "00";
-    end if;
-    if rising_edge(WR) then 
-        if(CE = '0' and A0 = '1') then 
-            control_reg_signal <= D(7 downto 6);
-        end if;
-    end if; 
-    
-end process control_reg_process;
-
-Control_Reg <= control_reg_signal when RESET = '0' else "00";
-
-data : process(CE, WR, A0, RD, Control_Reg, P, status_reg_signal, mode1_data) begin 
-    if(falling_edge(WR))then 
-        if(CE = '0' and RD = '0' and A0 = '1' and Control_Reg(0) = '1')then 
-            data_reg <= mode1_data;
+-- Mode 0 output
+output_op : process(P, CE, A0, CR, RD, STB, SR, data_in, RESET) begin
+    -- Mode 1  
+    if(falling_edge(STB)) then
+        if(CE = '0' and A0 = '0' and RD = '0' and CR(0) = '1')then
+            D_value <= data_in;
         end if;
     end if;
-    
-    if(CE = '0' and RD = '0' and WR = '1' and A0 = '1' and Control_Reg(0) = '0') then 
-        data_reg <= P;
-    elsif(CE = '0' and RD = '0' and WR = '1' and A0 = '0') then
-            data_reg(2 downto 0) <= status_reg_signal(2 downto 0);
+
+    -- mode 0
+    if (RESET = '0') then
+        if(CE = '0' and A0 = '0' and RD = '0' and CR(0) = '0') then
+            D_value <= P;
+        elsif(CE = '0' and A0 = '1' and RD = '0') then  -- status reg bit
+            D_value(2 downto 0) <= SR;
+        end if;
+    else
+        D_value <= (others => '0');
+    end if;
+   
+     
+end process output_op;
+
+OE_Enable : process(CR, RD, WR) begin
+    if(WR = '1' and CR(0) = '0' and CE = '0' and A0 = '0') then
+        OE <= '0';
+    elsif(RD = '1' and CR(0) = '1' and CE = '0' and A0 = '0') then
+        OE <= '1';
+    elsif (A0 = '1') then
+        OE <= '0';
+    else
+        OE <= '1';
+    end if;
+end process OE_Enable;
+
+
+CR_op : process(D, WR_rising, RESET, CE, A0) begin
+   
+    if(rising_edge(WR_rising)) then
+        if(CE = '0' and A0 = '1') then
+            CR(1) <= D(7);
+            CR(0) <= D(6);
+
+        end if;
+    end if;
+    if(RESET = '1') then
+        CR <= "00";
+    end if;
+
+end process CR_op;
+
+
+data_in_op : process(P_signal, CE, A0, STB, RESET) begin
+    if(falling_edge(STB)) then
+        if(CE = '0' and A0 = '0') then
+            data_in <= P_signal;
+            data_in_out <= data_in;
+        end if;
+    end if;
+       
+        if(RESET = '0') then
+            data_in <= (others => '0');
+        end if;
+       
+    if(CE = '0' and A0 = '0') then
+            Qualified_read <= RD;
      end if;
-    
 
-end process data;
+end process data_in_op;
 
-mode1_register_control: process(CE, STB, A0, P)begin
-    if(CE = '1' and falling_edge(STB) and A0 = '1') then 
-        mode1_data <= P;
-    end if; 
+-- output signals to outputs. (D, INTR, IBF)
+D <= D_value when CE = '0' else (others => 'Z');
 
-end process mode1_register_control;
 
-X1 <= STB;
--- RD has to be a qualified read
+-- asynchronous components
+X1 <= not(STB);
+
 X2 <= RD;
 
-Y1 <= ((not(Y2) and Y3 and X2) or (Y2 and not(Y3) and X1)) and not(RESET);
 
-Y2 <= ((Y3 and X1 and X2) or (Y2 and X1 and not(X2)) or (Y2 and Y3 and X1)) and not(RESET);
+Y1 <= ((Y1 and Y2) or (X1 and X2 and Y2) or (not(X1) and Y1) or (not(Y2) and Y1)) when CE = '0' and A0 = '0' and CR = "11" else '0' when RESET = '1';
 
-Y3 <= ((Y3 and X1 and X2) or (not(Y2) and Y3 and X2) or
-             (not(Y1) and not(Y2) and not(X1) and X2)) and not(RESET);
+Y2 <= ((not(Y1) and Y2) or (not(X1) and X2 and Y1) or (not(X1) and Y2) or (X2 and Y2)) when CE = '0' and A0 = '0' and CR = "11" else '0' when RESET = '1';
+
              
-Z1 <= ((Y3 and X1 and X2) or (not(Y1) and not(Y2) and not(X1) and X2) or (not(Y2) and Y3 and X2)
-                or (Y2 and Y3 and X1) or (Y2 and X1 and not(X2)));
+IBF_sig <= ((Y2) or (not(X1) and Y1) or (not(X1) and Y1) or (not(X1) and X2)) when CE = '0' and A0 = '0' and CR = "11" else '0'  when RESET = '1';
 
-Z2 <= (Y3 and X1 and X2);
-
+INTR_sig <= Z1 and Z2 when CE = '0' and A0 = '0' and CR = "11" else '0' when RESET = '1';
 
 
-INTR_signal <= Z2 when Control_Reg = "11" else '0';
+SR(2) <= INTR_sig when CE = '0' else '0';
+SR(1) <= CR(1) when CE = '0' else '0';
+SR(0) <= IBF_sig when CE = '0' else '0';
 
-IBF_signal <= Z1 when Control_Reg(0) = '1' else '0';
+SR_out <= SR;
+CR_out <= CR;
 
-Status_Reg0 <= IBF_signal when CE = '0' else '0' ;     -- IBF status
-Status_Reg1 <= Control_Reg(1) when CE = '0' else '0';  -- INTE status
-Status_Reg2 <= INTR_signal when CE = '0' else '0';   -- INTR status 
+IBF <=  IBF_sig;
+INTR <= INTR_sig;
 
-status_reg_signal(0) <= Status_Reg0;
-status_reg_signal(1) <= Status_Reg1;
-status_reg_signal(2) <= Status_Reg2;
 
-IBF <= IBF_signal;
-INTR <= INTR_signal;
-D <= data_reg when CE = '0' else (others => 'Z');
+
 
 end Behavioral;
