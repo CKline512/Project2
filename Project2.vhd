@@ -16,10 +16,7 @@ entity proj2 is
         P : in std_logic_vector(7 downto 0);
         D : inout std_logic_vector(7 downto 0);
         Y1, Y2 : inout std_logic; -- used for the asynchro section
-        INTR, IBF, Z1check, Z2check, X1_check, X2_check : out std_logic;
-        CR_out : out std_logic_vector(1 downto 0);
-        SR_out : out std_logic_vector(2 downto 0);
-        data_in_out : out std_logic_vector(7 downto 0);
+        INTR, IBF : out std_logic;
         OE : out std_logic
         );
 end proj2;
@@ -30,7 +27,7 @@ signal WR_rising : std_logic;
 signal data_in, D_value : std_logic_vector(7 downto 0);
 signal CR : std_logic_vector(1 downto 0);
 signal SR : std_logic_vector(2 downto 0);  -- 2 = INTR, 1 = INTE, 0 = IBF
-signal X1, X2, Z1, Z2 : std_logic;
+signal X1, X2 : std_logic;
 signal P_signal : std_logic_vector(7 downto 0);
 signal IBF_sig, INTR_sig : std_logic;
 signal check_value : std_logic;
@@ -66,7 +63,7 @@ output_op : process(P, CE, A0, CR, RD, STB, SR, data_in, RESET) begin
      
 end process output_op;
 
-OE_Enable : process(CR, RD, WR) begin
+OE_Enable : process(CR, RD, WR, CE) begin
     if(WR = '1' and CR(0) = '0' and CE = '0' and A0 = '0') then
         OE <= '0';
     elsif(RD = '1' and CR(0) = '1' and CE = '0' and A0 = '0') then
@@ -95,11 +92,10 @@ CR_op : process(D, WR_rising, RESET, CE, A0) begin
 end process CR_op;
 
 
-data_in_op : process(P_signal, CE, A0, STB, RESET) begin
+data_in_op : process(P, CE, A0, STB, RESET) begin
     if(falling_edge(STB)) then
         if(CE = '0' and A0 = '0') then
-            data_in <= P_signal;
-            data_in_out <= data_in;
+            data_in <= P;
         end if;
     end if;
        
@@ -118,7 +114,7 @@ D <= D_value when CE = '0' else (others => 'Z');
 
 
 -- asynchronous components
-X1 <= not(STB);
+X1 <= STB;
 
 X2 <= RD;
 
@@ -130,15 +126,12 @@ Y2 <= ((not(Y1) and Y2) or (not(X1) and X2 and Y1) or (not(X1) and Y2) or (X2 an
              
 IBF_sig <= ((Y2) or (not(X1) and Y1) or (not(X1) and Y1) or (not(X1) and X2)) when CE = '0' and A0 = '0' and CR = "11" else '0'  when RESET = '1';
 
-INTR_sig <= Z1 and Z2 when CE = '0' and A0 = '0' and CR = "11" else '0' when RESET = '1';
+INTR_sig <= Y1 and Y2 when CE = '0' and A0 = '0' and CR = "11" else '0' when RESET = '1';
 
 
 SR(2) <= INTR_sig when CE = '0' else '0';
 SR(1) <= CR(1) when CE = '0' else '0';
 SR(0) <= IBF_sig when CE = '0' else '0';
-
-SR_out <= SR;
-CR_out <= CR;
 
 IBF <=  IBF_sig;
 INTR <= INTR_sig;
