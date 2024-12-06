@@ -11,7 +11,6 @@ set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets WR];
 # ALLOW COMBINATORIAL LOOPS :
 set_property ALLOW_COMBINATORIAL_LOOPS TRUE [get_nets Y1*];
 set_property ALLOW_COMBINATORIAL_LOOPS TRUE [get_nets Y2*];
-set_property ALLOW_COMBINATORIAL_LOOPS TRUE [get_nets Y3*];
 set_property ALLOW_COMBINATORIAL_LOOPS TRUE [get_nets D*];
 
 ##Pmod Headers
@@ -51,7 +50,7 @@ set_property -dict { PACKAGE_PIN F13 IOSTANDARD LVCMOS33 } [get_ports { Y1 }]; #
 
 set_property -dict { PACKAGE_PIN G13 IOSTANDARD LVCMOS33 } [get_ports { Y2 }]; #IO_0_15 Sch=jb[9]
 
-set_property -dict { PACKAGE_PIN H16 IOSTANDARD LVCMOS33 } [get_ports { Y3 }]; #IO_L13P_T2_MRCC_15 Sch=jb[10]
+
 
 
 ##Pmod Header JC
